@@ -1,3 +1,4 @@
+#if !NETFX_CORE
 namespace Mapbox.IO.Compression {
 	using System;
 	using System.Threading;
@@ -129,3 +130,4 @@ namespace Mapbox.IO.Compression {
 
 }
 
+#endif

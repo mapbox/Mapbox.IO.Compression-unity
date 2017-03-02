@@ -2,123 +2,120 @@
 namespace Mapbox.IO.Compression {
 	using System.IO;
 	using System.Diagnostics;
-	using System.Security.Permissions;
 	using System;
 
 	public class GZipStream : Stream {
 
-        private DeflateStream deflateStream;
+		private DeflateStream deflateStream;
 
 
-        public GZipStream(Stream stream, CompressionMode mode)
-            
-            : this( stream, mode, false) {
-        }
+		public GZipStream(Stream stream, CompressionMode mode)
+
+			: this(stream, mode, false) {
+		}
 
 
-        public GZipStream(Stream stream, CompressionMode mode, bool leaveOpen) {
+		public GZipStream(Stream stream, CompressionMode mode, bool leaveOpen) {
 
-            deflateStream = new DeflateStream(stream, mode, leaveOpen);
-            SetDeflateStreamFileFormatter(mode);
-        }
-
-
-        // Implies mode = Compress
-        public GZipStream(Stream stream, CompressionLevel compressionLevel)
-
-            : this(stream, compressionLevel, false) {
-        }
+			deflateStream = new DeflateStream(stream, mode, leaveOpen);
+			SetDeflateStreamFileFormatter(mode);
+		}
 
 
-        // Implies mode = Compress
-        public GZipStream(Stream stream, CompressionLevel compressionLevel, bool leaveOpen) {
+		// Implies mode = Compress
+		public GZipStream(Stream stream, CompressionLevel compressionLevel)
 
-            deflateStream = new DeflateStream(stream, compressionLevel, leaveOpen);
-            SetDeflateStreamFileFormatter(CompressionMode.Compress);
-        }
-
-
-        private void SetDeflateStreamFileFormatter(CompressionMode mode) {
-
-            if (mode == CompressionMode.Compress) {
-
-                IFileFormatWriter writeCommand = new GZipFormatter();
-                deflateStream.SetFileFormatWriter(writeCommand);
-
-            } else {
-
-                IFileFormatReader readCommand = new GZipDecoder();
-                deflateStream.SetFileFormatReader(readCommand);
-            }
-        }
+			: this(stream, compressionLevel, false) {
+		}
 
 
-        public override bool CanRead { 
-            get {
-                if( deflateStream == null) {
-                    return false;
-                }
-                
-                return deflateStream.CanRead;
-            }
-        }
+		// Implies mode = Compress
+		public GZipStream(Stream stream, CompressionLevel compressionLevel, bool leaveOpen) {
 
-        public override bool CanWrite { 
-            get {
-                if( deflateStream == null) {
-                    return false;
-                }
-                
-                return deflateStream.CanWrite;
-            }
-        }
+			deflateStream = new DeflateStream(stream, compressionLevel, leaveOpen);
+			SetDeflateStreamFileFormatter(CompressionMode.Compress);
+		}
 
-        public override bool CanSeek { 
-            get {
-                if( deflateStream == null) {
-                   return false;
-                }
-                
-                return deflateStream.CanSeek;
-            }
-        }
 
-        public override long Length { 
-            get {
-                throw new NotSupportedException(SR.GetString(SR.NotSupported));
-            }
-        }
+		private void SetDeflateStreamFileFormatter(CompressionMode mode) {
 
-        public override long Position { 
-            get {
-                throw new NotSupportedException(SR.GetString(SR.NotSupported));            
-            } 
-            
-            set {
-                throw new NotSupportedException(SR.GetString(SR.NotSupported));            
-            }
-        }
+			if(mode == CompressionMode.Compress) {
 
-        public override void Flush() {
-            if( deflateStream == null) {
-                throw new ObjectDisposedException(null, SR.GetString(SR.ObjectDisposed_StreamClosed));
-            }
-            deflateStream.Flush();
-            return;
-        }
+				IFileFormatWriter writeCommand = new GZipFormatter();
+				deflateStream.SetFileFormatWriter(writeCommand);
 
-        public override long Seek(long offset, SeekOrigin origin) {
-            throw new NotSupportedException(SR.GetString(SR.NotSupported));            
-        }
+			} else {
 
-        public override void SetLength(long value) {
-            throw new NotSupportedException(SR.GetString(SR.NotSupported));            
-        }
+				IFileFormatReader readCommand = new GZipDecoder();
+				deflateStream.SetFileFormatReader(readCommand);
+			}
+		}
 
-#if !FEATURE_NETCORE
-        [HostProtection(ExternalThreading=true)]
-#endif
-        public override IAsyncResult BeginRead(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) {
+
+		public override bool CanRead {
+			get {
+				if(deflateStream == null) {
+					return false;
+				}
+
+				return deflateStream.CanRead;
+			}
+		}
+
+		public override bool CanWrite {
+			get {
+				if(deflateStream == null) {
+					return false;
+				}
+
+				return deflateStream.CanWrite;
+			}
+		}
+
+		public override bool CanSeek {
+			get {
+				if(deflateStream == null) {
+					return false;
+				}
+
+				return deflateStream.CanSeek;
+			}
+		}
+
+		public override long Length {
+			get {
+				throw new NotSupportedException(SR.GetString(SR.NotSupported));
+			}
+		}
+
+		public override long Position {
+			get {
+				throw new NotSupportedException(SR.GetString(SR.NotSupported));
+			}
+
+			set {
+				throw new NotSupportedException(SR.GetString(SR.NotSupported));
+			}
+		}
+
+		public override void Flush() {
+			if(deflateStream == null) {
+				throw new ObjectDisposedException(null, SR.GetString(SR.ObjectDisposed_StreamClosed));
+			}
+			deflateStream.Flush();
+			return;
+		}
+
+		public override long Seek(long offset, SeekOrigin origin) {
+			throw new NotSupportedException(SR.GetString(SR.NotSupported));
+		}
+
+		public override void SetLength(long value) {
+			throw new NotSupportedException(SR.GetString(SR.NotSupported));
+		}
+
+#if !NETFX_CORE
+		public override IAsyncResult BeginRead(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) {
             if( deflateStream == null) {
                 throw new InvalidOperationException(SR.GetString(SR.ObjectDisposed_StreamClosed));
             }
@@ -132,10 +129,8 @@ namespace Mapbox.IO.Compression {
             return deflateStream.EndRead(asyncResult);
         }
 
-#if !FEATURE_NETCORE
-        [HostProtection(ExternalThreading=true)]
-#endif
-        public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) {
+
+		public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) {
             if( deflateStream == null) {
                 throw new InvalidOperationException(SR.GetString(SR.ObjectDisposed_StreamClosed));
             }
@@ -149,46 +144,51 @@ namespace Mapbox.IO.Compression {
             deflateStream.EndWrite(asyncResult);
         }
 
-        public override int Read(byte[] array, int offset, int count) {
-            if( deflateStream == null) {
-                throw new ObjectDisposedException(null, SR.GetString(SR.ObjectDisposed_StreamClosed));
-            }
+#endif
 
-            return deflateStream.Read(array, offset, count);
-        }
+		public override int Read(byte[] array, int offset, int count) {
+			if(deflateStream == null) {
+				throw new ObjectDisposedException(null, SR.GetString(SR.ObjectDisposed_StreamClosed));
+			}
 
-        public override void Write(byte[] array, int offset, int count) {
-            if( deflateStream == null) {
-                throw new ObjectDisposedException(null, SR.GetString(SR.ObjectDisposed_StreamClosed));
-            }
+			return deflateStream.Read(array, offset, count);
+		}
 
-            deflateStream.Write(array, offset, count);
-        }
+		public override void Write(byte[] array, int offset, int count) {
+			if(deflateStream == null) {
+				throw new ObjectDisposedException(null, SR.GetString(SR.ObjectDisposed_StreamClosed));
+			}
 
-        protected override void Dispose(bool disposing) {
-            try {
-                if (disposing && deflateStream != null) {
-                    deflateStream.Close();
-                }
-                deflateStream = null;
-            }
-            finally {
-                base.Dispose(disposing);
-            }
-        }
+			deflateStream.Write(array, offset, count);
+		}
 
-        public Stream BaseStream { 
-            get {
-                if( deflateStream != null) {
-                    return deflateStream.BaseStream;
-                }
-                else {
-                    return null;
-                }
-            }
-        }
-    }
-    
+		protected override void Dispose(bool disposing) {
+			try {
+				if(disposing && deflateStream != null) {
+#if !NETFX_CORE
+					deflateStream.Close();
+#else
+					deflateStream.Dispose();
+#endif
+				}
+				deflateStream = null;
+			}
+			finally {
+				base.Dispose(disposing);
+			}
+		}
+
+		public Stream BaseStream {
+			get {
+				if(deflateStream != null) {
+					return deflateStream.BaseStream;
+				} else {
+					return null;
+				}
+			}
+		}
+	}
+
 }
 
 

@@ -1,29 +1,34 @@
 namespace Mapbox.IO.Compression {
-    
-    using System;
-    using System.Runtime.Serialization;
 
-#if !FEATURE_NETCORE
+	using System;
+	using System.Runtime.Serialization;
+
+#if !NETFX_CORE
     [Serializable] 
-#endif // !FEATURE_NETCORE
-    public sealed class InvalidDataException : SystemException
-    {
-        public InvalidDataException () 
-            : base(SR.GetString(SR.GenericInvalidData)) {
-        }
+#endif // !NETFX_CORE
+	public sealed class InvalidDataException
+#if NETFX_CORE
+		: Exception
+#else
+        : SystemException
+#endif
+	{
+		public InvalidDataException()
+			: base(SR.GetString(SR.GenericInvalidData)) {
+		}
 
-        public InvalidDataException (String message) 
-            : base(message) {
-        }
-    
-        public InvalidDataException (String message, Exception innerException) 
-            : base(message, innerException) {
-        }
-    
-#if !FEATURE_NETCORE
+		public InvalidDataException(String message)
+			: base(message) {
+		}
+
+		public InvalidDataException(String message, Exception innerException)
+			: base(message, innerException) {
+		}
+
+#if !NETFX_CORE
         internal InvalidDataException (SerializationInfo info, StreamingContext context) : base(info, context) {
         }
-#endif // !FEATURE_NETCORE
+#endif // !NETFX_CORE
 
-    }
+	}
 }

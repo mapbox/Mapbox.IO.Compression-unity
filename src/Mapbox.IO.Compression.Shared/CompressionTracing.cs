@@ -10,24 +10,24 @@ namespace Mapbox.IO.Compression
 
     // No tracing on Silverlight nor Windows Phone 7.
     internal class CompressionTracingSwitch
-#if !FEATURE_NETCORE
-        : Switch
-#endif // !FEATURE_NETCORE
-    {
-        internal readonly static CompressionTracingSwitch tracingSwitch =
+#if !NETFX_CORE
+        : System.Diagnostics.Switch
+#endif // !NETFX_CORE
+	{
+		internal readonly static CompressionTracingSwitch tracingSwitch =
             new CompressionTracingSwitch("CompressionSwitch", "Compression Library Tracing Switch");
 
         internal CompressionTracingSwitch(string displayName, string description)
-#if !FEATURE_NETCORE
+#if !NETFX_CORE
             : base(displayName, description)
-#endif // !FEATURE_NETCORE
-        {
-        }
+#endif // !NETFX_CORE
+		{
+		}
 
         public static bool Verbose {
             get {
-#if FEATURE_NETCORE
-                return false;
+#if NETFX_CORE
+				return false;
 #else
                 return tracingSwitch.SwitchSetting >= (int)CompressionTracingSwitchLevel.Verbose;
 #endif
@@ -36,8 +36,8 @@ namespace Mapbox.IO.Compression
 
         public static bool Informational {
             get {
-#if FEATURE_NETCORE
-                return false;
+#if NETFX_CORE
+				return false;
 #else
                 return tracingSwitch.SwitchSetting >= (int)CompressionTracingSwitchLevel.Informational;
 #endif

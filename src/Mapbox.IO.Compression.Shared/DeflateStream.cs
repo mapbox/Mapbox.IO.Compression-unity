@@ -8,7 +8,6 @@
 
 using System.Diagnostics;
 using System.Threading;
-using System.Security.Permissions;
 using System;
 using System.IO;
 
@@ -65,8 +64,9 @@ namespace Mapbox.IO.Compression {
 					}
 
 					inflater = new Inflater();
-
+#if !NETFX_CORE
 					m_CallBack = new AsyncCallback(ReadCallback);
+#endif
 					break;
 
 				case CompressionMode.Compress:
@@ -77,8 +77,10 @@ namespace Mapbox.IO.Compression {
 
 					deflater = CreateDeflater(null);
 
+#if !NETFX_CORE
 					m_AsyncWriterDelegate = new AsyncWriteDelegate(this.InternalWrite);
 					m_CallBack = new AsyncCallback(WriteCallback);
+#endif
 
 					break;
 
@@ -112,8 +114,10 @@ namespace Mapbox.IO.Compression {
 
 			deflater = CreateDeflater(compressionLevel);
 
+#if !NETFX_CORE
 			m_AsyncWriterDelegate = new AsyncWriteDelegate(this.InternalWrite);
 			m_CallBack = new AsyncCallback(WriteCallback);
+#endif
 
 			buffer = new byte[DefaultBufferSize];
 		}
@@ -128,7 +132,11 @@ namespace Mapbox.IO.Compression {
 				default:
 					// We do not expect this to ever be thrown.
 					// But this is better practice than returning null.
+#if NETFX_CORE
+					throw new Exception("Program entered an unexpected state.");
+#else
 					throw new SystemException("Program entered an unexpected state.");
+#endif
 			}
 		}
 
@@ -283,9 +291,7 @@ namespace Mapbox.IO.Compression {
 				throw new InvalidOperationException(SR.GetString(SR.CannotWriteToDeflateStream));
 		}
 
-#if !FEATURE_NETCORE
-		[HostProtection(ExternalThreading = true)]
-#endif
+#if !NETFX_CORE
 		public override IAsyncResult BeginRead(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) {
 
 			EnsureDecompressionMode();
@@ -394,6 +400,7 @@ namespace Mapbox.IO.Compression {
 
 			return (int)deflateStrmAsyncResult.Result;
 		}
+#endif
 
 		public override void Write(byte[] array, int offset, int count) {
 			EnsureCompressionMode();
@@ -432,11 +439,14 @@ namespace Mapbox.IO.Compression {
 			Debug.Assert(array != null);
 			Debug.Assert(count != 0);
 
+#if !NETFX_CORE
 			if(isAsync) {
 				IAsyncResult result = _stream.BeginWrite(array, offset, count, null, null);
 				_stream.EndWrite(result);
 
-			} else {
+			} else 
+#endif
+			{
 				_stream.Write(array, offset, count);
 			}
 		}
@@ -526,8 +536,11 @@ namespace Mapbox.IO.Compression {
 				try {
 
 					if(disposing && !_leaveOpen && _stream != null)
+#if !NETFX_CORE
 						_stream.Close();
-
+#else
+						_stream.Dispose();
+#endif
 				}
 				finally {
 
@@ -549,9 +562,8 @@ namespace Mapbox.IO.Compression {
 		}  // Dispose
 
 
-#if !FEATURE_NETCORE
-		[HostProtection(ExternalThreading = true)]
-#endif
+#if !NETFX_CORE
+
 		public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) {
 
 			EnsureCompressionMode();
@@ -651,6 +663,8 @@ namespace Mapbox.IO.Compression {
 				asyncResult.Close();  // this will just close the wait handle
 			}
 		}
+
+#endif
 
 	}  // public class DeflateStream
 
